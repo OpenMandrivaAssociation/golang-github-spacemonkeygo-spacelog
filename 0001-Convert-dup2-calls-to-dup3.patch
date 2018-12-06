@@ -1,0 +1,35 @@
+From c9a99d6e668942ed60aabf6c4cb81ce7479ab5e4 Mon Sep 17 00:00:00 2001
+From: Peter Robinson <pbrobinson@gmail.com>
+Date: Sat, 27 Feb 2016 22:50:01 +0000
+Subject: [PATCH] Convert dup2 calls to dup3
+
+Convert syscall.Dup2 calls to syscall.Dup3. The dup2 syscall is depreciated
+and is not available on some architectures. Fixes build errors like these when
+building for arm64:
+
+Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
+---
+ capture_other.go | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/capture_other.go b/capture_other.go
+index 5a62a2a..6f5ce58 100644
+--- a/capture_other.go
++++ b/capture_other.go
+@@ -23,11 +23,11 @@ import (
+ // CaptureOutputToFd redirects the current process' stdout and stderr file
+ // descriptors to the given file descriptor, using the dup2 syscall.
+ func CaptureOutputToFd(fd int) error {
+-	err := syscall.Dup2(fd, syscall.Stdout)
++	err := syscall.Dup3(fd, syscall.Stdout, 0)
+ 	if err != nil {
+ 		return err
+ 	}
+-	err = syscall.Dup2(fd, syscall.Stderr)
++	err = syscall.Dup3(fd, syscall.Stderr, 0)
+ 	if err != nil {
+ 		return err
+ 	}
+-- 
+2.5.0
+
